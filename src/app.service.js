@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import Pet from "./models/Pet.model.js";
 
+// Add pets
 export async function addPets(req, res) {
   try {
     let path = req.file.path;
@@ -39,5 +40,64 @@ export async function addPets(req, res) {
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// Get all pets
+export async function getAllPets(req, res) {
+  const pets = await Pet.find();
+  return res.status(200).json({ success: true, data: { pets } });
+}
+
+// Get pet by ID
+export async function getPetById(req, res) {
+  try {
+    const petId = req.params.petId;
+    const pet = await Pet.findById(petId);
+    console.log({ pet });
+    if (!pet) {
+      return res
+        .status(404)
+        .json({ success: false, message: `No pet found with id ${petId}` });
+    }
+
+    return res.json({ success: true, data: { pet } });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+}
+
+// Update pet by Id
+export async function updatePetById(req, res) {
+  try {
+    const payload = req.body;
+    const petId = req.params.petId;
+    const pet = await Pet.findByIdAndUpdate(petId, payload, {
+      returnDocument: "after",
+    });
+    if (!pet) {
+      return res
+        .status(404)
+        .json({ success: false, message: `No pet found with id ${petId}` });
+    }
+    return res.json({ success: true, data: { pet } });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+}
+
+export async function deleteById(req, res) {
+  try {
+    const payload = req.body;
+    const petId = req.params.petId;
+    const pet = await Pet.findByIdAndDelete(petId);
+    if (!pet) {
+      return res
+        .status(404)
+        .json({ success: false, message: `No pet found with id ${petId}` });
+    }
+    return res.json({ success: true, message: "deleted successfully" });
+  } catch (err) {
+    return res.status(500).json(err);
   }
 }
